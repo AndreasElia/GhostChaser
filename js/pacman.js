@@ -9,31 +9,97 @@ var Pacman = function() {
 
     this.speed = 4;
 
-    this.init = function(name, colour, object) {
+    this.cube = null;
+    this.raycaster = null;
+
+    this.init = function(name, colour, object, x, z) {
         this.name = name;
         this.colour = colour;
         this.object = object;
 
-        var currentElementCollada = new t.ColladaLoader();
-        currentElementCollada.options.convertUpAxis = true;
+        var geometry = new t.BoxGeometry(5, 5, 5),
+            texture;
 
-        currentElementCollada.load('objects/' + this.object + '.DAE', function(collada) {
-            var currentElementDae = collada.scene;
-
-            currentElementDae.position.set(0, 0, 0);
-            currentElementDae.scale.set(10, 10, 10);
-
-            currentElementDae.updateMatrix();
-
-            updateElementColour(currentElementDae, new t.MeshBasicMaterial({
-                color: this.colour
-            }));
-
-            scene.add(currentElementDae);
+        texture = new THREE.MeshBasicMaterial({
+            color: this.colour,
+            side: t.DoubleSide
         });
+
+        this.cube = new t.Mesh(geometry, texture);
+        this.cube.position.set(-30 + (x * 10), UNIT * .1, -30 + (z * 10));
+        scene.add(this.cube);
+
+        this.raycaster = new t.Raycaster(new t.Vector3(), new t.Vector3(0, -1, 0), 0, 10);
     };
 
     this.update = function(dt) {
+        this.raycaster.ray.origin.copy(this.cube.position);
+        var intersects = this.raycaster.intersectObjects(objects);
+        if (intersects.length > 0 && intersects[0].object.name.type == 'dot') {
+            for (var i = 0; i < objects.length; i++) {
+                if (objects[i] == intersects[0].object) {
+                    score++;
+                    scene.remove(objects[i]);
+                    objects.splice(objects.indexOf(objects[i]), 1);
+                }
+            }
+        }
 
+        this.raycaster.ray.origin.copy(this.cube.position);
+        var intersects = this.raycaster.intersectObjects(objects);
+        if (intersects.length > 0 && intersects[0].object.name.type == 'power') {
+            for (var i = 0; i < objects.length; i++) {
+                if (objects[i] == intersects[0].object) {
+                    score += 3;
+                    for (var g = 0; g < ghosts.length; g++) {
+                        ghosts[g].colour = 0x5942C9;
+                    }
+                    scene.remove(objects[i]);
+                    objects.splice(objects.indexOf(objects[i]), 1);
+                }
+            }
+        }
+
+        this.raycaster.ray.origin.copy(this.cube.position);
+        this.raycaster.ray.origin.z -= 5;
+        var intersects = this.raycaster.intersectObjects(objects);
+        if (intersects.length > 0 && intersects[0].object.name.type == 'wall') {
+            key.reset(key.D);
+            key.reset(key.RIGHT);
+        }
+
+        this.raycaster.ray.origin.copy(this.cube.position);
+        this.raycaster.ray.origin.x -= 5;
+        var intersects = this.raycaster.intersectObjects(objects);
+        if (intersects.length > 0 && intersects[0].object.name.type == 'wall') {
+            key.reset(key.W);
+            key.reset(key.UP);
+        }
+
+        this.raycaster.ray.origin.copy(this.cube.position);
+        this.raycaster.ray.origin.x += 5;
+        var intersects = this.raycaster.intersectObjects(objects);
+        if (intersects.length > 0 && intersects[0].object.name.type == 'wall') {
+            key.reset(key.S);
+            key.reset(key.DOWN);
+        }
+
+        this.raycaster.ray.origin.copy(this.cube.position);
+        this.raycaster.ray.origin.z += 5;
+        var intersects = this.raycaster.intersectObjects(objects);
+        if (intersects.length > 0 && intersects[0].object.name.type == 'wall') {
+            key.reset(key.A);
+            key.reset(key.LEFT);
+        }
+
+        if ((key.down(key.W) || key.down(key.UP))) {
+            this.cube.position.x -= 1;
+        } else if ((key.down(key.S) || key.down(key.DOWN))) {
+            this.cube.position.x += 1;
+        } else if ((key.down(key.A) || key.down(key.LEFT))) {
+            this.cube.position.z += 1;
+        } else if ((key.down(key.D) || key.down(key.RIGHT))) {
+            this.cube.position.z -= 1;
+        }
     };
 };
