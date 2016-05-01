@@ -8,6 +8,7 @@ var Ghost = function() {
     this.object = null;
 
     this.speed = 4;
+    this.cube = null;
 
     this.init = function(name, colour, object, x, z) {
         this.name = name;
@@ -15,19 +16,18 @@ var Ghost = function() {
         this.object = object;
 
         var geometry = new t.BoxGeometry(5, 5, 5),
-            texture, cube;
+            texture;
 
         texture = new THREE.MeshBasicMaterial({
             color: this.colour,
             side: t.DoubleSide
         });
 
-        cube = new t.Mesh(geometry, texture);
-        cube.position.set(-30 + (x * 10), UNIT * .1, -30 + (z * 10));
-        scene.add(cube);
+        this.cube = new t.Mesh(geometry, texture);
+        this.cube.position.set(-30 + (x * 10), UNIT * .1, -30 + (z * 10));
+        scene.add(this.cube);
     };
 
     this.update = function(dt) {
-
     };
 };

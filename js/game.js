@@ -55,8 +55,10 @@ var UNIT = 100,
 
 var objects = [];
 
-var t = THREE,
-    stats, scene, camera, renderer, clock;
+var powerTimer = false;
+var maxPowerTime = 300;
+var currentPowerTime = 0;
+var oldGhostColours = [];
 
 var level = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -119,15 +121,19 @@ function init() {
                 case Tile.GHOST_SPAWN:
                     var ghost1 = new Ghost();
                     ghost1.init("Clyde", 0xF6821F, "GhostObject", x, z);
+                    ghosts.push(ghost1);
 
                     var ghost2 = new Ghost();
                     ghost2.init("Blinky", 0xF599B2, "GhostObject", x, z);
+                    ghosts.push(ghost2);
 
                     var ghost3 = new Ghost();
                     ghost3.init("Pinky", 0xED1B22, "GhostObject", x, z);
+                    ghosts.push(ghost3);
 
                     var ghost4 = new Ghost();
                     ghost4.init("Inky", 0xFFCC00, "GhostObject", x, z);
+                    ghosts.push(ghost4);
                     break;
                 default:
                     // do nothing
@@ -210,6 +216,19 @@ function animate() {
 
     for (var g = 0; g < ghosts.length; g++) {
         ghosts[g].update(dt);
+    }
+
+    if (powerTimer) {
+        currentPowerTime++;
+
+        if (currentPowerTime >= maxPowerTime) {
+            for (var g = 0; g < ghosts.length; g++) {
+                ghosts[g].cube.material.color.setHex(oldGhostColours[g]);
+            }
+
+            currentPowerTime = 0;
+            powerTimer = false;
+        }
     }
 
     render();

@@ -52,10 +52,16 @@ var Pacman = function() {
                 if (objects[i] == intersects[0].object) {
                     score += 3;
                     for (var g = 0; g < ghosts.length; g++) {
-                        ghosts[g].colour = 0x5942C9;
+                        oldGhostColours.push(ghosts[g].cube.material.color.getHex());
+                        ghosts[g].cube.material.color.setHex(0x5942C9);
                     }
                     scene.remove(objects[i]);
                     objects.splice(objects.indexOf(objects[i]), 1);
+                    if (powerTimer) {
+                    currentPowerTime = 0;
+                } else {
+                    powerTimer = true;
+                }
                 }
             }
         }
