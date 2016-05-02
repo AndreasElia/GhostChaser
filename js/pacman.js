@@ -12,6 +12,11 @@ var Pacman = function() {
     this.cube = null;
     this.raycaster = null;
 
+    this.directionUp = false;
+    this.directionDown = false;
+    this.directionLeft = false;
+    this.directionRight = false;
+
     this.init = function(name, colour, object, x, z) {
         this.name = name;
         this.colour = colour;
@@ -26,7 +31,7 @@ var Pacman = function() {
         });
 
         this.cube = new t.Mesh(geometry, texture);
-        this.cube.position.set(-30 + (x * 10), UNIT * .1, -30 + (z * 10));
+        this.cube.position.set(-30 + (x * 10), 0.1, -30 + (z * 10));
         scene.add(this.cube);
 
         this.raycaster = new t.Raycaster(new t.Vector3(), new t.Vector3(0, -1, 0), 0, 10);
@@ -39,8 +44,14 @@ var Pacman = function() {
             for (var i = 0; i < objects.length; i++) {
                 if (objects[i] == intersects[0].object) {
                     score++;
+                    scene.remove(textMesh);
+                    createText();
                     scene.remove(objects[i]);
                     objects.splice(objects.indexOf(objects[i]), 1);
+
+                    if (score == dotsCount) {
+                        console.log("winner");
+                    }
                 }
             }
         }
@@ -99,6 +110,7 @@ var Pacman = function() {
         }
 
         if ((key.down(key.W) || key.down(key.UP))) {
+            // this.direction = this.directions.up;
             this.cube.position.x -= 1;
         } else if ((key.down(key.S) || key.down(key.DOWN))) {
             this.cube.position.x += 1;

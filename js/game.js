@@ -2,6 +2,8 @@
  * @author Andreas Elia / http://github.com/andreaselia/
  */
 
+var DEBUG = true;
+
 // Window variables
 var WIDTH = window.innerWidth;
 var HEIGHT = window.innerHeight;
@@ -11,9 +13,6 @@ var ASPECT = WIDTH / HEIGHT;
 var t = THREE;
 
 var gameElement = document.getElementById('gameDivContainer');
-
-var dots = 0,
-    score = 0;
 
 // Stats for tracking performance
 var stats, key;
@@ -40,18 +39,13 @@ var Tile = {
 var currentElementCollada;
 var currentElementDae;
 
-// Stores the texture and font loaders
+// Font variables
+var font, textGeometry, textMesh, textMaterial;
 var fontLoader;
 
-/*
-    ------------------------------------
- */
-
-var WIDTH = window.innerWidth,
-    HEIGHT = window.innerHeight;
-var ASPECT = WIDTH / HEIGHT;
-var UNIT = 100,
-    WALLSIZE = 16;
+var dots = 0;
+var score = 0;
+var dotsCount = 0;
 
 var objects = [];
 
@@ -60,16 +54,30 @@ var maxPowerTime = 300;
 var currentPowerTime = 0;
 var oldGhostColours = [];
 
+// Level array
 var level = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 7, 1, 0, 1, 7, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 7, 1, 0, 1, 7, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-    [1, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+];
+
+// Data array
+var data = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ];
 
 function init() {
@@ -113,7 +121,7 @@ function init() {
 
     for (var x = 0; x < level.length; x++) {
         for (var z = 0; z < level[0].length; z++) {
-            switch (level[x][z]) {
+            switch (data[x][z]) {
                 case Tile.PACMAN_SPAWN:
                     pacman = new Pacman();
                     pacman.init("Pacman", 0xFFEE00, "PacmanObject", x, z);
@@ -141,9 +149,58 @@ function init() {
         }
     }
 
+    fontLoader = new t.FontLoader();
+
+    fontLoader.load('fonts/helvetiker_regular.typeface.js', function(response) {
+        font = response;
+
+        scene.remove(textMesh);
+        createText();
+    });
+
     animate();
 
     setupScene();
+}
+
+function createText() {
+    // empty spots
+    textGeometry = new t.TextGeometry("Score: " + score, {
+        font,
+        size: 6,
+        height: 1
+    });
+
+    textMaterial = new t.MultiMaterial(
+        [
+            new t.MeshPhongMaterial({
+                color: 0xff00ff,
+                shading: t.FlatShading
+            }),
+            new t.MeshPhongMaterial({
+                color: 0xffffff,
+                shading: t.SmoothShading
+            })
+        ]
+    );
+
+    textMesh = new t.Mesh(textGeometry, textMaterial);
+
+    textGeometry.computeBoundingBox();
+
+    var textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
+    var textHeight = textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y;
+
+    textMesh.position.x = -30 + (-5 * 10) + (-0.5 * textWidth) + 1;
+    textMesh.position.y = 0.1 + (-0.5 * textHeight);
+    textMesh.position.z = -30 + (5 * 10) + 2;
+
+    textMesh.rotation.order = "YXZ";
+    textMesh.rotation.y = 90 * Math.PI / 180;
+    textMesh.rotation.x = -90 * Math.PI / 180;
+    textMesh.rotation.z = 0;
+
+    scene.add(textMesh);
 }
 
 function setupScene() {
@@ -156,11 +213,12 @@ function setupScene() {
 
                     texture = new THREE.MeshBasicMaterial({
                         color: 0x5942C9,
-                        side: t.DoubleSide
+                        side: t.DoubleSide,
+                        wireframe: DEBUG
                     });
 
                     cube = new t.Mesh(geometry, texture);
-                    cube.position.set(-30 + (x * 10), UNIT * .1, -30 + (z * 10));
+                    cube.position.set(-30 + (x * 10), 0.1, -30 + (z * 10));
                     cube.name = {
                         type: 'wall',
                     };
@@ -169,7 +227,7 @@ function setupScene() {
                     break;
                 default:
                     dots++;
-                    if (level[x][z] == Tile.POWER_DOT) {
+                    if (data[x][z] == Tile.POWER_DOT) {
                         var geometry = new t.BoxGeometry(3, 3, 3),
                             texture, sphere;
 
@@ -179,12 +237,15 @@ function setupScene() {
                         });
 
                         sphere = new t.Mesh(geometry, texture);
-                        sphere.position.set(-30 + (x * 10), UNIT * .1, -30 + (z * 10));
+                        sphere.position.set(-30 + (x * 10), 0.1, -30 + (z * 10));
                         sphere.name = {
                             type: 'power',
                         };
+                        dotsCount += 3;
                         scene.add(sphere);
                         objects.push(sphere);
+                    } else if (data[x][z] == Tile.PACMAN_SPAWN) {
+                        continue;
                     } else {
                         var geometry = new t.BoxGeometry(1, 1, 1),
                             texture, sphere;
@@ -195,10 +256,11 @@ function setupScene() {
                         });
 
                         sphere = new t.Mesh(geometry, texture);
-                        sphere.position.set(-30 + (x * 10), UNIT * .1, -30 + (z * 10));
+                        sphere.position.set(-30 + (x * 10), 0.1, -30 + (z * 10));
                         sphere.name = {
                             type: 'dot',
                         };
+                        dotsCount++;
                         scene.add(sphere);
                         objects.push(sphere);
                     }
