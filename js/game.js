@@ -2,7 +2,7 @@
  * @author Andreas Elia / http://github.com/andreaselia/
  */
 
-var DEBUG = true;
+var DEBUG = true;//false;
 
 // Window variables
 var WIDTH = window.innerWidth;
@@ -95,9 +95,9 @@ function init() {
 
     // camera.position.y = 110;
     camera.position.y = 190;
-    camera.position.z = 80;
+    camera.position.z = 150;
     // camera.position.x = 90;
-    camera.position.x = 10;
+    camera.position.x = 40;
 
     // camera.rotation.x = -5.5;
 
@@ -131,17 +131,17 @@ function init() {
                     ghost1.init("Clyde", 0xF6821F, "GhostObject", x, z);
                     ghosts.push(ghost1);
 
-                    var ghost2 = new Ghost();
-                    ghost2.init("Blinky", 0xF599B2, "GhostObject", x, z);
-                    ghosts.push(ghost2);
-
-                    var ghost3 = new Ghost();
-                    ghost3.init("Pinky", 0xED1B22, "GhostObject", x, z);
-                    ghosts.push(ghost3);
-
-                    var ghost4 = new Ghost();
-                    ghost4.init("Inky", 0xFFCC00, "GhostObject", x, z);
-                    ghosts.push(ghost4);
+                    // var ghost2 = new Ghost();
+                    // ghost2.init("Blinky", 0xF599B2, "GhostObject", x, z);
+                    // ghosts.push(ghost2);
+                    //
+                    // var ghost3 = new Ghost();
+                    // ghost3.init("Pinky", 0xED1B22, "GhostObject", x, z);
+                    // ghosts.push(ghost3);
+                    //
+                    // var ghost4 = new Ghost();
+                    // ghost4.init("Inky", 0xFFCC00, "GhostObject", x, z);
+                    // ghosts.push(ghost4);
                     break;
                 default:
                     // do nothing
@@ -191,9 +191,9 @@ function createText() {
     var textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
     var textHeight = textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y;
 
-    textMesh.position.x = -30 + (-5 * 10) + (-0.5 * textWidth) + 1;
+    textMesh.position.x = 20 + (-5 * 10) + (-0.5 * textWidth) + 1;
     textMesh.position.y = 0.1 + (-0.5 * textHeight);
-    textMesh.position.z = -30 + (5 * 10) + 2;
+    textMesh.position.z = 20 + (5 * 10) + 2;
 
     textMesh.rotation.order = "YXZ";
     textMesh.rotation.y = 90 * Math.PI / 180;
@@ -218,7 +218,7 @@ function setupScene() {
                     });
 
                     cube = new t.Mesh(geometry, texture);
-                    cube.position.set(-30 + (x * 10), 0.1, -30 + (z * 10));
+                    cube.position.set(20 + (x * 10), 0.1, z * 10);
                     cube.name = {
                         type: 'wall',
                     };
@@ -237,7 +237,7 @@ function setupScene() {
                         });
 
                         sphere = new t.Mesh(geometry, texture);
-                        sphere.position.set(-30 + (x * 10), 0.1, -30 + (z * 10));
+                        sphere.position.set(20 + (x * 10), 0.1, z * 10);
                         sphere.name = {
                             type: 'power',
                         };
@@ -256,7 +256,7 @@ function setupScene() {
                         });
 
                         sphere = new t.Mesh(geometry, texture);
-                        sphere.position.set(-30 + (x * 10), 0.1, -30 + (z * 10));
+                        sphere.position.set(20 + (x * 10), 0.1, z * 10);
                         sphere.name = {
                             type: 'dot',
                         };
@@ -276,9 +276,10 @@ function animate() {
 
     pacman.update(dt);
 
-    for (var g = 0; g < ghosts.length; g++) {
-        ghosts[g].update(dt);
-    }
+    // for (var g = 0; g < ghosts.length; g++) {
+    //     ghosts[g].update(dt);
+    // }
+    ghosts[0].update(dt);
 
     if (powerTimer) {
         currentPowerTime++;
