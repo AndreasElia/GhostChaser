@@ -35,7 +35,7 @@ var Ghost = function() {
         });
 
         this.cube = new t.Mesh(geometry, texture);
-        this.cube.position.set(20 + (x * 10), 0.1, z * 10);
+        this.cube.position.set(x * 10, 0.1, z * 10);
         scene.add(this.cube);
     };
 
@@ -49,43 +49,31 @@ var Ghost = function() {
 
                 texture = new t.MeshBasicMaterial({
                     color: 0xB65959,
-                    side: t.DoubleSide
+                    side: t.DoubleSide,
+                    transparent: true,
+                    opacity: 0.5
                 });
 
                 cube = new t.Mesh(geometry, texture);
-                cube.position.set(20 + (this.path[x][1] * 10), 0.01, this.path[x][0] * 10);
+                cube.position.set(this.path[x][1] * 10, 0.01, this.path[x][0] * 10);
                 scene.add(cube);
             }
 
             this.pathInfo = true;
         }
 
-        // this.gx = Math.floor(this.cube.position.x / 10) - 1;
-        // // this.gz = (Math.floor((20 + this.cube.position.z) / level.length) - 25) * -1;
-        //
-        // for (var x = 0; x < this.path.length; x++) {
-        //     if (this.path[x][1] < this.gx) {
-        //         this.cube.translateX(-0.05);
-        //     } else if (this.path[x][1] > this.gx) {
-        //         this.cube.translateX(0.05);
-        //     }
-        // }
-        //
-        // console.log(this.gx + ", " + this.gz);
-
-        this.gx = Math.floor(this.cube.position.x / 10);
-        this.gz = Math.floor((20 + this.cube.position.z) / 10);
-
-        console.log("curr: " + (Math.floor(this.cube.position.x / 10)) + ", path: " + this.path[this.count][1]);
-
-        if (this.count < (this.path.length - 1)) {
-            if (this.path[this.count][1] < this.gx) {
-                this.cube.translateX(-0.05);
-            } else if (this.path[this.count][1] > this.gx) {
-                this.cube.translateX(0.05);
+        if (this.count < this.path.length) {
+            if (this.path[this.count][1] * 10 < this.cube.position.x) {
+                this.cube.translateX(-0.5);
+            } else if (this.path[this.count][1] * 10 > this.cube.position.x) {
+                this.cube.translateX(0.5);
+            } else if (this.path[this.count][0] * 10 > this.cube.position.z) {
+                this.cube.translateZ(0.5);
+            } else if (this.path[this.count][0] * 10 < this.cube.position.z) {
+                this.cube.translateZ(-0.5);
+            } else {
+                this.count++;
             }
-
-            this.count++;
         }
     };
 };

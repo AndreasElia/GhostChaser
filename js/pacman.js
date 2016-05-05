@@ -32,7 +32,7 @@ var Pacman = function() {
         });
 
         this.cube = new t.Mesh(geometry, texture);
-        this.cube.position.set(20 + (x * 10), 0.1, z * 10);
+        this.cube.position.set(x * 10, 0.1, z * 10);
         scene.add(this.cube);
 
         this.raycaster = new t.Raycaster(new t.Vector3(), new t.Vector3(0, -1, 0), 0, 10);

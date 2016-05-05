@@ -191,9 +191,9 @@ function createText() {
     var textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
     var textHeight = textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y;
 
-    textMesh.position.x = 20 + (-5 * 10) + (-0.5 * textWidth) + 1;
+    textMesh.position.x = -5 * 10 + (-0.5 * textWidth) + 1;
     textMesh.position.y = 0.1 + (-0.5 * textHeight);
-    textMesh.position.z = 20 + (5 * 10) + 2;
+    textMesh.position.z = 5 * 10 + 2;
 
     textMesh.rotation.order = "YXZ";
     textMesh.rotation.y = 90 * Math.PI / 180;
@@ -218,7 +218,7 @@ function setupScene() {
                     });
 
                     cube = new t.Mesh(geometry, texture);
-                    cube.position.set(20 + (x * 10), 0.1, z * 10);
+                    cube.position.set(x * 10, 0.1, z * 10);
                     cube.name = {
                         type: 'wall',
                     };
@@ -237,7 +237,7 @@ function setupScene() {
                         });
 
                         sphere = new t.Mesh(geometry, texture);
-                        sphere.position.set(20 + (x * 10), 0.1, z * 10);
+                        sphere.position.set(x * 10, 0.1, z * 10);
                         sphere.name = {
                             type: 'power',
                         };
@@ -256,7 +256,7 @@ function setupScene() {
                         });
 
                         sphere = new t.Mesh(geometry, texture);
-                        sphere.position.set(20 + (x * 10), 0.1, z * 10);
+                        sphere.position.set(x * 10, 0.1, z * 10);
                         sphere.name = {
                             type: 'dot',
                         };
