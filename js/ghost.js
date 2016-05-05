@@ -80,9 +80,9 @@ var Ghost = function() {
 
         if (this.count < (this.path.length - 1)) {
             if (this.path[this.count][1] < this.gx) {
-                this.cube.translateX(-2.15);
+                this.cube.translateX(-0.05);
             } else if (this.path[this.count][1] > this.gx) {
-                this.cube.translateX(2.15);
+                this.cube.translateX(0.05);
             }
 
             this.count++;
