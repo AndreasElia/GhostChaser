@@ -4,75 +4,119 @@
 
 var Ghost = function() {
     this.name = null;
-    this.colour = null;
-    this.object = null;
-
-    this.speed = 4;
+    this.colour = 0xFFFFFF;
+    this.speed = 0;
     this.cube = null;
 
     this.grid = new PF.Grid(level[0].length, level.length, level);
+    this.finder = new PF.BiAStarFinder(allowDiagonal);
+    this.path = [];
 
-    this.finder = new PF.AStarFinder();
-
-    this.path = this.finder.findPath(11, 4, 21, 1, this.grid);
+    this.pathSet = false;
     this.pathInfo = false;
+    this.corner = 0;
     this.count = 0;
 
     this.gx = 0;
     this.gz = 0;
 
-    this.init = function(name, colour, object, x, z) {
+    this.powerDotCount = 0;
+    this.edible = false;
+
+    this.init = function(name, colour, speed, x, z) {
         this.name = name;
         this.colour = colour;
-        this.object = object;
+        this.speed = speed;
 
-        var geometry = new t.BoxGeometry(5, 5, 5),
-            texture;
-
-        texture = new t.MeshBasicMaterial({
+        var geometry = new t.BoxGeometry(5, 5, 5);
+        var texture = new t.MeshBasicMaterial({
             color: this.colour,
             side: t.DoubleSide
         });
 
         this.cube = new t.Mesh(geometry, texture);
         this.cube.position.set(x * 10, 0.1, z * 10);
+        this.cube.name = {
+            type: 'ghost',
+            edible: this.edible
+        };
+
         scene.add(this.cube);
+        objects.push(this.cube);
+
+        return this;
     };
 
-    this.update = function(dt) {
-        // Draw the path
-        if (!this.pathInfo) {
-            for (var x = 0; x < this.path.length; x++) {
+    this.update = function() {
+        // Always update the ghosts name to let the player know if it is in an edible state or not
+        this.cube.name = {
+            type: 'ghost',
+            edible: this.edible
+        };
 
-                var geometry = new t.BoxGeometry(3, 3, 3),
-                    texture, cube;
+        if (this.name == 'Sparkles' && !this.pathSet) {
+            // This ghost will constantly pathfind to the players position
+            this.path = this.finder.findPath(Math.floor(this.cube.position.z / 10), Math.floor(this.cube.position.x / 10), Math.floor(player.cube.position.z / 10), Math.floor(player.cube.position.x / 10), this.grid.clone());
 
-                texture = new t.MeshBasicMaterial({
-                    color: 0xB65959,
-                    side: t.DoubleSide,
-                    transparent: true,
-                    opacity: 0.5
-                });
-
-                cube = new t.Mesh(geometry, texture);
-                cube.position.set(this.path[x][1] * 10, 0.01, this.path[x][0] * 10);
-                scene.add(cube);
+            this.pathInfo = false;
+            this.pathSet = true;
+            this.count = 0;
+        } else if (this.name == 'Bones' && !this.pathSet) {
+            // This ghost will circle the outer walls of the level but sometimes go back on themself
+            if (this.corner == 0) {
+                this.path = this.finder.findPath(Math.floor(this.cube.position.z / 10), Math.floor(this.cube.position.x / 10), 1, 1, this.grid.clone());
+                this.corner++;
+            } else if (this.corner == 1) {
+                this.path = this.finder.findPath(Math.floor(this.cube.position.z / 10), Math.floor(this.cube.position.x / 10), 1, 7, this.grid.clone());
+                (randomBool()) ? this.corner++: this.corner--;
+            } else if (this.corner == 2) {
+                this.path = this.finder.findPath(Math.floor(this.cube.position.z / 10), Math.floor(this.cube.position.x / 10), 21, 7, this.grid.clone());
+                (randomBool()) ? this.corner++: this.corner--;
+            } else if (this.corner == 3) {
+                this.path = this.finder.findPath(Math.floor(this.cube.position.z / 10), Math.floor(this.cube.position.x / 10), 21, 1, this.grid.clone());
+                this.corner = 0;
             }
 
-            this.pathInfo = true;
+            this.pathInfo = false;
+            this.pathSet = true;
+            this.count = 0;
+        } else if (this.name == 'Shadow' && !this.pathSet) {
+            // This ghost will circle round to all of the power dots
+            if (powerDots.length < this.powerDotCount) {
+                this.powerDotCount = 0;
+            }
+
+            if (powerDots.length > this.powerDotCount) {
+                this.path = this.finder.findPath(Math.floor(this.cube.position.z / 10), Math.floor(this.cube.position.x / 10), powerDots[this.powerDotCount][1], powerDots[this.powerDotCount][0], this.grid.clone());
+                this.powerDotCount++;
+            }
+
+            this.pathInfo = false;
+            this.pathSet = true;
+            this.count = 0;
         }
 
-        if (this.count < this.path.length) {
-            if (this.path[this.count][1] * 10 < this.cube.position.x) {
-                this.cube.translateX(-0.5);
-            } else if (this.path[this.count][1] * 10 > this.cube.position.x) {
-                this.cube.translateX(0.5);
-            } else if (this.path[this.count][0] * 10 > this.cube.position.z) {
-                this.cube.translateZ(0.5);
-            } else if (this.path[this.count][0] * 10 < this.cube.position.z) {
-                this.cube.translateZ(-0.5);
+        // Handle the movement along the path comparing it to the current position
+        if (this.pathSet && this.path.length > this.count) {
+            if ((this.path[this.count][1] * 10) < this.cube.position.x) {
+                this.cube.translateX(-this.speed);
+            } else if ((this.path[this.count][1] * 10) > this.cube.position.x) {
+                this.cube.translateX(this.speed);
+            } else if ((this.path[this.count][0] * 10) > this.cube.position.z) {
+                this.cube.translateZ(this.speed);
+            } else if ((this.path[this.count][0] * 10) < this.cube.position.z) {
+                this.cube.translateZ(-this.speed);
             } else {
+                // Every time the ghost moves to a path step the count is increased
                 this.count++;
+            }
+        }
+
+        // Handle checking if the ghost is at the final step of the path and
+        // request a new path by setting pathSet to false
+        if (this.pathSet && this.path[this.path.length - 1] != undefined) {
+            if (this.path[this.path.length - 1][0] == Math.floor(this.cube.position.z / 10) && this.path[this.path.length - 1][1] == Math.floor(this.cube.position.x / 10)) {
+                this.pathSet = false;
             }
         }
     };
